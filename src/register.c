@@ -346,6 +346,21 @@ int io_uring_unregister_buf_ring(struct io_uring *ring, int bgid)
 	return do_register(ring, IORING_UNREGISTER_PBUF_RING, &reg, 1);
 }
 
+int io_uring_register_kmbuf_ring(struct io_uring *ring,
+				 struct io_uring_buf_reg *reg,
+				 unsigned int __maybe_unused flags)
+{
+	reg->flags |= flags;
+	return do_register(ring, IORING_REGISTER_KMBUF_RING, reg, 1);
+}
+
+int io_uring_unregister_kmbuf_ring(struct io_uring *ring, int bgid)
+{
+	struct io_uring_buf_reg reg = { .bgid = bgid };
+
+	return do_register(ring, IORING_UNREGISTER_KMBUF_RING, &reg, 1);
+}
+
 int io_uring_buf_ring_head(struct io_uring *ring, int buf_group, uint16_t *head)
 {
 	liburing_sanitize_address(head);

@@ -334,6 +334,10 @@ int io_uring_register_buf_ring(struct io_uring *ring,
 	struct io_uring_buf_reg *reg, unsigned int flags) LIBURING_NOEXCEPT;
 int io_uring_unregister_buf_ring(struct io_uring *ring, int bgid)
 	LIBURING_NOEXCEPT;
+int io_uring_register_kmbuf_ring(struct io_uring *ring,
+	struct io_uring_buf_reg *reg, unsigned int flags) LIBURING_NOEXCEPT;
+int io_uring_unregister_kmbuf_ring(struct io_uring *ring, int bgid)
+	LIBURING_NOEXCEPT;
 int io_uring_buf_ring_head(struct io_uring *ring,
 	int buf_group, uint16_t *head) LIBURING_NOEXCEPT;
 int io_uring_register_sync_cancel(struct io_uring *ring,
