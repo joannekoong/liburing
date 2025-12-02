@@ -338,6 +338,9 @@ int io_uring_register_kmbuf_ring(struct io_uring *ring,
 	struct io_uring_buf_reg *reg, unsigned int flags) LIBURING_NOEXCEPT;
 int io_uring_unregister_kmbuf_ring(struct io_uring *ring, int bgid)
 	LIBURING_NOEXCEPT;
+int io_uring_setup_kmbuf_ring(struct io_uring *ring, int bgid,
+			      unsigned int nentries, unsigned int buf_size,
+			      unsigned int flags, void **addr) LIBURING_NOEXCEPT;
 int io_uring_buf_ring_head(struct io_uring *ring,
 	int buf_group, uint16_t *head) LIBURING_NOEXCEPT;
 int io_uring_register_sync_cancel(struct io_uring *ring,

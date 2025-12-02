@@ -685,6 +685,39 @@ struct io_uring_buf_ring *io_uring_setup_buf_ring(struct io_uring *ring,
 	return br;
 }
 
+int io_uring_setup_kmbuf_ring(struct io_uring *ring, int bgid,
+	unsigned int nentries, unsigned int buf_size,
+	unsigned int flags, void **addr)
+{
+	struct io_uring_buf_reg reg = {};
+	size_t size;
+	void *ptr;
+	off_t off;
+	int ret;
+
+	reg.buf_size = buf_size;
+	reg.ring_entries = nentries;
+	reg.bgid = bgid;
+
+	ret = io_uring_register_kmbuf_ring(ring, &reg, flags);
+	if (ret)
+		return ret;
+
+	off = IORING_OFF_KMBUF_RING |
+		    (unsigned long long) bgid << IORING_OFF_KMBUF_SHIFT;
+	size = nentries * buf_size;
+	ptr = __sys_mmap(NULL, size, PROT_READ | PROT_WRITE,
+			 MAP_SHARED | MAP_POPULATE, ring->ring_fd, off);
+	if (IS_ERR(ptr)) {
+		io_uring_unregister_kmbuf_ring(ring, bgid);
+		return PTR_ERR(ptr);
+	}
+
+	*addr = ptr;
+
+	return 0;
+}
+
 int io_uring_free_buf_ring(struct io_uring *ring, struct io_uring_buf_ring *br,
 			   unsigned int nentries, int bgid)
 {

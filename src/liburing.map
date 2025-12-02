@@ -135,4 +135,5 @@ LIBURING_2.13 {
 	global:
 		io_uring_register_kmbuf_ring;
 		io_uring_unregister_kmbuf_ring;
+		io_uring_setup_kmbuf_ring;
 } LIBURING_2.12;
