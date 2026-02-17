@@ -125,6 +125,8 @@ LIBURING_2.11 {
 		io_uring_memory_size;
 		io_uring_memory_size_params;
 		io_uring_register_sync_msg;
+
+		io_uring_setup_buf_ring_kernel_managed;
 } LIBURING_2.10;
 
 LIBURING_2.12 {

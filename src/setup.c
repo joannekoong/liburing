@@ -680,11 +680,55 @@ struct io_uring_buf_ring *io_uring_setup_buf_ring(struct io_uring *ring,
 {
 	struct io_uring_buf_ring *br;
 
+	if (flags & IOU_PBUF_RING_KERNEL_MANAGED) {
+		*err = -EINVAL;
+		return NULL;
+	}
+
 	br = br_setup(ring, nentries, bgid, flags, err);
 	if (br)
 		io_uring_buf_ring_init(br);
 
 	return br;
+}
+
+void *io_uring_setup_buf_ring_kernel_managed(struct io_uring *ring,
+					     unsigned int buf_size,
+					     unsigned int nentries,
+					     int bgid, unsigned int flags,
+					     int *err)
+{
+	struct io_uring_buf_reg reg;
+	void *buf_region;
+	size_t size;
+	off_t off;
+	int lret;
+
+	memset(&reg, 0, sizeof(reg));
+	reg.buf_size = buf_size;
+	reg.ring_entries = nentries;
+	reg.bgid = bgid;
+	reg.flags = flags | IOU_PBUF_RING_MMAP |
+	    IOU_PBUF_RING_KERNEL_MANAGED;
+
+	*err = 0;
+	lret = io_uring_register_buf_ring(ring, &reg, flags);
+	if (lret) {
+		*err = lret;
+		return NULL;
+	}
+
+	off = IORING_OFF_PBUF_RING | (unsigned long long) bgid << IORING_OFF_PBUF_SHIFT;
+	size = nentries * buf_size;
+	buf_region = __sys_mmap(NULL, size, PROT_READ | PROT_WRITE,
+			MAP_SHARED | MAP_POPULATE, ring->ring_fd, off);
+	if (IS_ERR(buf_region)) {
+		*err = PTR_ERR(buf_region);
+		io_uring_unregister_buf_ring(ring, bgid);
+		return NULL;
+	}
+
+	return buf_region;
 }
 
 int io_uring_free_buf_ring(struct io_uring *ring, struct io_uring_buf_ring *br,
